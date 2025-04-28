@@ -86,3 +86,19 @@ generateBtn.addEventListener('click', async () => {
     generateBtn.disabled = false;
   }
 });
+
+// localStorageからAzure OpenAIリソース名とデプロイ名を読み込み
+window.addEventListener('DOMContentLoaded', () => {
+  const savedAccount = localStorage.getItem('accountName');
+  if (savedAccount) accountNameInput.value = savedAccount;
+  const savedDeployment = localStorage.getItem('deploymentName');
+  if (savedDeployment) deploymentNameInput.value = savedDeployment;
+});
+
+// 入力変更時にlocalStorageへ保存
+accountNameInput.addEventListener('change', () => {
+  localStorage.setItem('accountName', accountNameInput.value.trim());
+});
+deploymentNameInput.addEventListener('change', () => {
+  localStorage.setItem('deploymentName', deploymentNameInput.value.trim());
+});
