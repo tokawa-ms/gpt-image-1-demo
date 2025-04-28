@@ -8,6 +8,8 @@ const imagePreview = document.getElementById('imagePreview');
 const promptInput = document.getElementById('prompt');
 const generateBtn = document.getElementById('generateBtn');
 const resultImage = document.getElementById('resultImage');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const noImageSwitch = document.getElementById('noImageSwitch');
 
 let selectedFile = null;
 
@@ -34,12 +36,13 @@ clearBtn.addEventListener('click', () => {
 
 // 画像生成
 generateBtn.addEventListener('click', async () => {
+  const useNoImage = noImageSwitch.checked;
   const accountName = accountNameInput.value.trim();
   const apiKey = apiKeyInput.value.trim();
   const deploymentName = deploymentNameInput.value.trim();
   const prompt = promptInput.value.trim();
-  if (!accountName || !apiKey || !deploymentName || !selectedFile || !prompt) {
-    alert('すべての入力項目と画像を指定してください');
+  if (!accountName || !apiKey || !deploymentName || (!selectedFile && !useNoImage) || !prompt) {
+    alert('すべての入力項目とプロンプトを指定してください');
     return;
   }
 
@@ -47,17 +50,27 @@ generateBtn.addEventListener('click', async () => {
   loadingSpinner.classList.remove('hidden');
   resultImage.classList.add('hidden');
 
-  const url = `https://${accountName}.openai.azure.com/openai/deployments/${deploymentName}/images/edits?api-version=2025-04-01-preview`;
-  const formData = new FormData();
-  formData.append('image', selectedFile, selectedFile.name);
-  formData.append('prompt', prompt);
+  let url;
+  let fetchOptions;
+  if (useNoImage) {
+    // リファレンス画像なしで生成
+    url = `https://${accountName}.openai.azure.com/openai/deployments/${deploymentName}/images/generations?api-version=2025-04-01-preview`;
+    fetchOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': apiKey },
+      body: JSON.stringify({ prompt })
+    };
+  } else {
+    // 画像編集
+    url = `https://${accountName}.openai.azure.com/openai/deployments/${deploymentName}/images/edits?api-version=2025-04-01-preview`;
+    const formData = new FormData();
+    formData.append('image', selectedFile, selectedFile.name);
+    formData.append('prompt', prompt);
+    fetchOptions = { method: 'POST', headers: { 'api-key': apiKey }, body: formData };
+  }
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'api-key': apiKey },
-      body: formData
-    });
+    const res = await fetch(url, fetchOptions);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const json = await res.json();
     const b64 = json.data?.[0]?.b64_json;
