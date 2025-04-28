@@ -28,6 +28,12 @@
         <input type="file" id="imageInput" accept="image/*" class="border rounded p-2 mt-1">
         <button id="clearImage" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded ml-2">削除</button>
       </div>
+      <div class="mt-2">
+        <label class="inline-flex items-center">
+          <input type="checkbox" id="noImageSwitch" class="form-checkbox">
+          <span class="ml-2">参照画像なしで生成する</span>
+        </label>
+      </div>
       <div>
         <label>プロンプト</label>
         <textarea id="prompt" class="border rounded p-2 mt-1 w-full" placeholder="画像加工内容を入力"></textarea>
